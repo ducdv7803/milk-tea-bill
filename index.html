@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#7c3f25">
+<title>Bill Quán - Mỳ Cay & Trà Sữa</title>
+<style>
+:root{--brown:#7c3f25;--brown2:#a85e3a;--cream:#fff8f0;--line:#ead9ca;--ink:#2b211c;--muted:#77675e;--red:#b42318;--green:#24764b}
+*{box-sizing:border-box}
+body{margin:0;background:#f6eee7;color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+header{background:var(--brown);color:white;padding:22px 16px 18px;text-align:center}
+header h1{margin:0;font-size:23px} header p{margin:6px 0 0;font-size:13px;opacity:.9}
+main{max-width:760px;margin:0 auto;padding:14px 12px 36px}
+.tabs{display:flex;gap:8px;margin-bottom:14px}
+.tab{flex:1;border:1px solid var(--line);background:white;border-radius:12px;padding:12px 8px;font-weight:700;color:var(--brown)}
+.tab.active{background:var(--brown);color:white;border-color:var(--brown)}
+.panel{display:none;background:white;border:1px solid var(--line);border-radius:16px;padding:16px;margin-bottom:14px;box-shadow:0 3px 12px #4b2a1710}
+.panel.active{display:block}
+h2{font-size:18px;margin:0 0 12px}
+label{display:block;font-size:13px;color:var(--muted);margin:10px 0 5px}
+input{width:100%;font-size:16px;padding:12px;border:1px solid #d9c7b9;border-radius:10px;background:#fff}
+button{font:inherit;cursor:pointer;border:0;border-radius:10px;padding:11px 13px;font-weight:700}
+.primary{background:var(--brown);color:white}
+.secondary{background:#f4e7dc;color:var(--brown)}
+.danger{background:#fff0ee;color:var(--red)}
+.small{padding:8px 10px;font-size:13px}
+.formrow{display:grid;grid-template-columns:1fr 130px;gap:10px;align-items:end}
+.product-list{display:flex;flex-direction:column;gap:8px;margin-top:14px}
+.product{display:flex;justify-content:space-between;align-items:center;gap:10px;border:1px solid var(--line);padding:10px;border-radius:12px}
+.product-name{font-weight:700;overflow-wrap:anywhere}
+.product-price{font-size:14px;color:var(--brown);margin-top:3px}
+.actions{display:flex;gap:6px;flex-shrink:0}
+.menu-list{display:flex;flex-direction:column;gap:9px}
+.menu-item{display:grid;grid-template-columns:minmax(0,1fr) 86px;gap:10px;align-items:center;border:1px solid var(--line);border-radius:12px;padding:11px}
+.menu-item .name{font-weight:700}
+.menu-item .price{font-size:13px;color:var(--muted);margin-top:4px}
+.qty{display:flex;align-items:center;gap:6px}
+.qty button{width:30px;height:34px;padding:0;background:#f4e7dc;color:var(--brown);font-size:18px}
+.qty input{padding:6px 3px;text-align:center;min-width:0;height:34px}
+.totalrow{display:flex;justify-content:space-between;gap:12px;align-items:center;padding-top:15px;margin-top:15px;border-top:2px dashed var(--line);font-weight:800;font-size:18px}
+.total{font-size:23px;color:var(--brown);text-align:right}
+.hint{font-size:12px;color:var(--muted);line-height:1.5;margin-top:10px}
+.bill{background:#fffdf9;border:1px dashed #c8a58d;border-radius:12px;padding:18px;margin-top:16px}
+.bill-head{text-align:center;border-bottom:1px dashed #d8c2b1;padding-bottom:12px;margin-bottom:12px}
+.bill-head h3{margin:0 0 5px;color:var(--brown);font-size:21px}
+.bill-head p{margin:3px 0;font-size:12px;color:var(--muted)}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th,td{padding:8px 3px;border-bottom:1px solid #eee1d6;text-align:right;vertical-align:top}
+th:first-child,td:first-child{text-align:left}
+th{color:var(--muted);font-weight:600}
+.bill-total{display:flex;justify-content:space-between;font-weight:800;font-size:18px;padding-top:12px}
+.thanks{text-align:center;color:var(--brown);font-weight:700;margin:16px 0 0}
+.bill-actions{display:flex;gap:8px;margin-top:12px}
+.bill-actions button{flex:1}
+.empty{text-align:center;padding:20px;color:var(--muted);font-size:14px}
+footer{text-align:center;color:var(--muted);font-size:11px;padding:4px 16px 22px}
+@media(min-width:600px){main{padding:20px}.panel{padding:20px}.menu-item{grid-template-columns:minmax(0,1fr) 110px}}
+</style>
+</head>
+<body>
+<header>
+  <h1>🧋 Bill Quán</h1>
+  <p>Mỳ cay • Trà sữa • Tạo bill nhanh</p>
+</header>
+<main>
+  <div class="tabs">
+    <button class="tab active" data-tab="bill-panel">Tạo bill</button>
+    <button class="tab" data-tab="products-panel">Sản phẩm</button>
+  </div>
+
+  <section class="panel active" id="bill-panel">
+    <h2>Chọn món và nhập số lượng</h2>
+    <div id="menu-list" class="menu-list"></div>
+    <div id="empty-menu" class="empty" hidden>Chưa có sản phẩm. Hãy thêm sản phẩm ở mục “Sản phẩm”.</div>
+    <div class="totalrow"><span>Tổng cộng</span><span class="total" id="live-total">0 đ</span></div>
+    <button class="primary" style="width:100%;margin-top:14px" id="create-bill">Tạo bill</button>
+    <p class="hint">Giá và danh sách sản phẩm được lưu trên Safari của thiết bị này. Bill không được lưu thành lịch sử.</p>
+    <div id="bill-result" hidden>
+      <div class="bill" id="bill">
+        <div class="bill-head">
+          <h3>BILL THANH TOÁN</h3>
+          <p>MỲ CAY & TRÀ SỮA</p>
+          <p id="bill-datetime"></p>
+        </div>
+        <table>
+          <thead><tr><th>Món</th><th>SL</th><th>Đơn giá</th><th>Thành tiền</th></tr></thead>
+          <tbody id="bill-items"></tbody>
+        </table>
+        <div class="bill-total"><span>TỔNG CỘNG</span><span id="bill-total">0 đ</span></div>
+        <p class="thanks">Cảm ơn quý khách! ❤️</p>
+      </div>
+      <div class="bill-actions">
+        <button class="primary" id="download-bill">Tải bill PNG</button>
+        <button class="secondary" id="new-bill">Bill mới</button>
+      </div>
+      <p class="hint">Trên iPhone, sau khi ảnh được mở/tải xuống, hãy dùng tùy chọn Chia sẻ hoặc Lưu vào Ảnh nếu Safari hiển thị.</p>
+    </div>
+  </section>
+
+  <section class="panel" id="products-panel">
+    <h2>Quản lý sản phẩm</h2>
+    <label for="product-name">Tên sản phẩm</label>
+    <input id="product-name" maxlength="100" placeholder="Ví dụ: Mỳ cay bò">
+    <div class="formrow">
+      <div><label for="product-price">Giá bán (VNĐ)</label><input id="product-price" type="number" min="0" step="1000" inputmode="numeric" placeholder="40000"></div>
+      <button class="primary" id="save-product">Thêm món</button>
+    </div>
+    <button class="secondary small" id="cancel-edit" style="display:none;margin-top:8px">Hủy sửa</button>
+    <div id="product-list" class="product-list"></div>
+    <p class="hint">Bạn có thể thêm món mới, sửa giá hoặc xóa món. Thao tác này chỉ thay đổi danh sách sản phẩm, không có lịch sử bill.</p>
+  </section>
+</main>
+<footer>Ứng dụng đơn giản chạy trên trình duyệt • Không cần đăng nhập</footer>
+<script>
+const STORAGE_KEY = "milkTeaProductsV1";
+const defaultProducts = [
+ {id:"p1",name:"Mỳ cay bò",price:40000},
+ {id:"p2",name:"Mỳ cay hải sản",price:45000},
+ {id:"p3",name:"Trà sữa truyền thống",price:25000},
+ {id:"p4",name:"Trà sữa trân châu",price:30000},
+ {id:"p5",name:"Trà đào",price:25000}
+];
+let products = [];
+let editingId = null;
+const $ = id => document.getElementById(id);
+const money = n => new Intl.NumberFormat("vi-VN").format(n) + " đ";
+function loadProducts(){
+  try {
+    const saved = localStorage.getItem(STORAGE_KEY);
+    products = saved ? JSON.parse(saved) : defaultProducts.map(p=>({...p}));
+    if(!Array.isArray(products)) throw new Error("Invalid products");
+  } catch(e) { products = defaultProducts.map(p=>({...p})); }
+}
+function saveProducts(){ try { localStorage.setItem(STORAGE_KEY, JSON.stringify(products)); } catch(e) { alert("Safari không lưu được dữ liệu. Hãy kiểm tra cài đặt dữ liệu website của Safari."); } }
+function escapeHtml(s){return String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));}
+function renderProducts(){
+  $("product-list").innerHTML = products.length ? products.map(p=>`
+    <div class="product">
+      <div><div class="product-name">${escapeHtml(p.name)}</div><div class="product-price">${money(p.price)}</div></div>
+      <div class="actions"><button class="secondary small" data-edit="${p.id}">Sửa</button><button class="danger small" data-delete="${p.id}">Xóa</button></div>
+    </div>`).join("") : '<div class="empty">Chưa có sản phẩm.</div>';
+  $("product-list").querySelectorAll("[data-edit]").forEach(b=>b.onclick=()=>editProduct(b.dataset.edit));
+  $("product-list").querySelectorAll("[data-delete]").forEach(b=>b.onclick=()=>deleteProduct(b.dataset.delete));
+  renderMenu();
+}
+function renderMenu(){
+  const oldQty = {};
+  $("menu-list").querySelectorAll("[data-qty]").forEach(i=>oldQty[i.dataset.qty]=Math.max(0,parseInt(i.value||"0",10)||0));
+  $("menu-list").innerHTML = products.map(p=>`
+    <div class="menu-item">
+      <div><div class="name">${escapeHtml(p.name)}</div><div class="price">${money(p.price)}</div></div>
+      <div class="qty"><button type="button" aria-label="Giảm" data-minus="${p.id}">−</button><input type="number" min="0" step="1" inputmode="numeric" value="${oldQty[p.id]||0}" data-qty="${p.id}" aria-label="Số lượng ${escapeHtml(p.name)}"><button type="button" aria-label="Tăng" data-plus="${p.id}">+</button></div>
+    </div>`).join("");
+  $("empty-menu").hidden = products.length>0;
+  $("menu-list").querySelectorAll("[data-qty]").forEach(i=>i.addEventListener("input",updateTotal));
+  $("menu-list").querySelectorAll("[data-minus]").forEach(b=>b.onclick=()=>changeQty(b.dataset.minus,-1));
+  $("menu-list").querySelectorAll("[data-plus]").forEach(b=>b.onclick=()=>changeQty(b.dataset.plus,1));
+  updateTotal();
+}
+function getQty(id){const i=$("menu-list").querySelector(`[data-qty="${CSS.escape(id)}"]`);return i?Math.max(0,parseInt(i.value||"0",10)||0):0;}
+function changeQty(id,d){const i=$("menu-list").querySelector(`[data-qty="${CSS.escape(id)}"]`);if(i){i.value=Math.max(0,(parseInt(i.value||"0",10)||0)+d);updateTotal();}}
+function updateTotal(){let total=0;products.forEach(p=>total+=p.price*getQty(p.id));$("live-total").textContent=money(total);}
+function clearForm(){$("product-name").value="";$("product-price").value="";editingId=null;$("save-product").textContent="Thêm món";$("cancel-edit").style.display="none";}
+function editProduct(id){const p=products.find(x=>x.id===id);if(!p)return;$("product-name").value=p.name;$("product-price").value=p.price;editingId=id;$("save-product").textContent="Lưu sửa";$("cancel-edit").style.display="inline-block";window.scrollTo({top:0,behavior:"smooth"});}
+function deleteProduct(id){const p=products.find(x=>x.id===id);if(!p)return;if(!confirm(`Bạn có chắc muốn xóa món "${p.name}"?`))return;products=products.filter(x=>x.id!==id);saveProducts();renderProducts();if(editingId===id)clearForm();}
+$("save-product").onclick=()=>{
+ const name=$("product-name").value.trim(), price=Number($("product-price").value);
+ if(!name){alert("Vui lòng nhập tên sản phẩm.");$("product-name").focus();return;}
+ if($("product-price").value===""||!Number.isFinite(price)||price<0){alert("Vui lòng nhập giá bán hợp lệ.");$("product-price").focus();return;}
+ if(editingId){products=products.map(p=>p.id===editingId?{...p,name,price:Math.round(price)}:p);}
+ else products.push({id:"p"+Date.now()+Math.random().toString(16).slice(2,6),name,price:Math.round(price)});
+ saveProducts();clearForm();renderProducts();
+};
+$("cancel-edit").onclick=clearForm;
+document.querySelectorAll(".tab").forEach(b=>b.onclick=()=>{
+ document.querySelectorAll(".tab").forEach(t=>t.classList.toggle("active",t===b));
+ document.querySelectorAll(".panel").forEach(p=>p.classList.toggle("active",p.id===b.dataset.tab));
+});
+$("create-bill").onclick=()=>{
+ const items=products.map(p=>({...p,qty:getQty(p.id),subtotal:p.price*getQty(p.id)})).filter(p=>p.qty>0);
+ if(!items.length){alert("Bạn hãy nhập số lượng ít nhất một món.");return;}
+ const total=items.reduce((s,p)=>s+p.subtotal,0);
+ $("bill-items").innerHTML=items.map(p=>`<tr><td>${escapeHtml(p.name)}</td><td>${p.qty}</td><td>${money(p.price)}</td><td>${money(p.subtotal)}</td></tr>`).join("");
+ $("bill-total").textContent=money(total);
+ $("bill-datetime").textContent=new Intl.DateTimeFormat("vi-VN",{dateStyle:"short",timeStyle:"short"}).format(new Date());
+ $("bill-result").hidden=false;
+ $("bill-result").scrollIntoView({behavior:"smooth",block:"start"});
+};
+$("new-bill").onclick=()=>{
+ $("bill-result").hidden=true;
+ $("menu-list").querySelectorAll("[data-qty]").forEach(i=>i.value=0);
+ updateTotal();
+ window.scrollTo({top:0,behavior:"smooth"});
+};
+$("download-bill").onclick=()=>{
+ const rows=[...$("bill-items").querySelectorAll("tr")].map(tr=>[...tr.querySelectorAll("td")].map(td=>td.textContent));
+ const total=$("bill-total").textContent, dt=$("bill-datetime").textContent;
+ const width=760, pad=36, rowH=46, headH=150, footH=115, height=headH+rows.length*rowH+footH;
+ const canvas=document.createElement("canvas");canvas.width=width*2;canvas.height=height*2;
+ const ctx=canvas.getContext("2d");ctx.scale(2,2);
+ ctx.fillStyle="#fffdf9";ctx.fillRect(0,0,width,height);
+ ctx.strokeStyle="#c8a58d";ctx.setLineDash([5,4]);ctx.lineWidth=1;ctx.strokeRect(12,12,width-24,height-24);ctx.setLineDash([]);
+ ctx.textAlign="center";ctx.fillStyle="#7c3f25";ctx.font="bold 28px Arial";ctx.fillText("BILL THANH TOÁN",width/2,55);
+ ctx.font="bold 16px Arial";ctx.fillText("MỲ CAY & TRÀ SỮA",width/2,82);
+ ctx.fillStyle="#77675e";ctx.font="14px Arial";ctx.fillText(dt,width/2,108);
+ const xs=[pad,pad+300,pad+380,pad+510,pad+width-2*pad];
+ ctx.textAlign="left";ctx.fillStyle="#77675e";ctx.font="bold 13px Arial";
+ ctx.fillText("Món",xs[0],headH);ctx.textAlign="right";ctx.fillText("SL",xs[2]-10,headH);ctx.fillText("Đơn giá",xs[3]-8,headH);ctx.fillText("Thành tiền",xs[4],headH);
+ ctx.strokeStyle="#ead9ca";ctx.beginPath();ctx.moveTo(pad,headH+10);ctx.lineTo(width-pad,headH+10);ctx.stroke();
+ rows.forEach((r,i)=>{const y=headH+rowH*(i+1);ctx.textAlign="left";ctx.fillStyle="#2b211c";ctx.font="13px Arial";let name=r[0];while(ctx.measureText(name).width>285&&name.length>5)name=name.slice(0,-2);if(name!==r[0])name+="…";ctx.fillText(name,xs[0],y);ctx.textAlign="right";ctx.fillText(r[1],xs[2]-10,y);ctx.fillText(r[2],xs[3]-8,y);ctx.fillText(r[3],xs[4],y);ctx.beginPath();ctx.moveTo(pad,y+10);ctx.lineTo(width-pad,y+10);ctx.stroke();});
+ const totalY=headH+rows.length*rowH+40;
+ ctx.textAlign="left";ctx.fillStyle="#2b211c";ctx.font="bold 18px Arial";ctx.fillText("TỔNG CỘNG",pad,totalY);
+ ctx.textAlign="right";ctx.fillStyle="#7c3f25";ctx.font="bold 22px Arial";ctx.fillText(total,width-pad,totalY);
+ ctx.textAlign="center";ctx.fillStyle="#7c3f25";ctx.font="bold 16px Arial";ctx.fillText("Cảm ơn quý khách! ♥",width/2,totalY+50);
+ canvas.toBlob(blob=>{if(!blob){alert("Không tạo được ảnh bill trên trình duyệt này.");return;}const url=URL.createObjectURL(blob);const a=document.createElement("a");a.href=url;a.download="bill-quan-"+Date.now()+".png";document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),3000);});
+};
+loadProducts();renderProducts();
+</script>
+</body>
+</html>
